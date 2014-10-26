@@ -1,0 +1,139 @@
+---
+output: html_document
+---
+
+### 08 Practical Machine Learning - Project Assignment. #
+Author: vkoretsky | Date: 10-25-2014
+
+#### Executive summary: #
+The project goal is to build a prediction model on a set of Human Activity Recognition (HAR) data.
+The data comes from the following source: http://groupware.les.inf.puc-rio.br/har.
+
+#### Dataset description: #
+HAR training data set: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+HAR testing data set: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+Data set consists of various measurements (3-D acceleration at various points) on subjects performing various types of activities (walking, standing, standing up, sitting, sitting down).
+The outcome variable is classe.
+Because alorigthm model selection is the main point of this exercise, I omitted downloading of data files from this script (on purpose).
+
+#### Exploratory Data Analysis: #
+The training dataset is comprised of 160 columns with 19622 observations. (** Appendix A1 **)
+There is a fair amount of columns with a high proportion of either NA or empty values. I removed these columns. The trigger I used was if more than 20% of observations in a column were NA values or if more than 80% of the column values were empty. However, the actual NA/empty ratios were in the 97% range, so these cutoffs turned out to be symbolic.
+
+#### Model Selection Strategy: #
+I attempted to plot availabe predictor variables against the outcome. The resulting plots were non-informative (every variable had values roughly in the same range accross most of the outcome categories). Example plot can be seen in ** Appendix A2 **. This dataset is not nice and clear-cut as our simple lecture examples and I was not able to come up with any single variable that could be used as a reliable and intuitive predictor.
+I split the training data set into training and testing sub-sets (60/40). The training sub-set was further split into a training and testing sub-sub-sets (25/75).
+I started with a tree model, which produced un-remarkable results (30-55% accuracy, depending on column options I chose).
+At that point, I decided to try random forest model. Use of this model necessitated removal of non-numeric columns.
+
+#### Model Tuning: #
+Due to random forest being processing-intensive, I performed model tuning on a training sub-sub-set (15% of total training data set). Computation took ~9min. The resulting model was based on 27 predictors. No pre-processing was done. Cross-validation was performed via 25 repetitions of bootstrapping. You can see model tuning parameters in ** Appendix A3 **.
+I then tried to predict the values on the same set used to tune the model. The model fit the data perfectly (an example of overfitting). I then fit the model to the 60% of the training data set. The overall accuracy results were encouraging (98.07% accuracy). I then predicted the outcome on the remaining 40% of the training data set (set apart as test data) using this model, which produced 98.18% accuracy. I therefore, estimate out-of-sample error to be ~2%, based on these observations. Please see ** Appendix A4 ** for these details.
+
+#### Conclusion: #
+Overall, random forest model was highly effective in using the available data to provide a very accurate (by beginner standards) prediction. This model was able to predict 18/20 outcomes in the TEST data set (I actually got 20/20, but on my final version something changed and I could not reproduce that). The drawback of random forest approach (to me) is difficulty in inferring or explaining the results. I am not even sure how to identify the 27 out of 54 columns that were used in the final model.
+
+#### Appendix: #
+```{r cache=TRUE, echo=FALSE}
+clean_data <- function(df){
+    ### See how many columns have excessive amount of NA values: ###
+    naCounter <- 0;
+    naColumns <- c();
+    for(i in 1:ncol(df)){
+        notNa <- nrow(df[is.na(df[,i])==F,])
+        na <- nrow(df[is.na(df[,i])==T,])
+        naRatio <- (na * 100)/(na + notNa)
+        if(naRatio > 20){
+            # increment counter:
+            naCounter <- naCounter + 1;
+            
+            # print column index, name, and NA ratio:
+            #print(sprintf("Column #%i: %s = %f NA ratio.", i, colnames(dfRaw)[i], naRatio));
+            
+            # store the column index:
+            naColumns <- c(naColumns, i)
+            next
+        }
+        empty <- nrow(df[df[,i]=="",])
+        notEmpty <- nrow(df[df[,i]!="",])
+        emptyRatio = (empty * 100)/(empty + notEmpty)
+        if(emptyRatio > 80){
+            # increment counter:
+            naCounter <- naCounter + 1;
+            
+            # print column index, name, and empty ratio:
+            #print(sprintf("Column #%i: %s = %f empty ratio.", i, colnames(dfRaw)[i], emptyRatio));
+            
+            # store the column index:
+            naColumns <- c(naColumns, i)
+            next
+        }
+    }
+    naColumns
+}
+```
+##### A1: #
+```{r cache=TRUE, echo=FALSE}
+### Load training and testing data: ###
+setwd("C:\\Users\\Vadim\\Documents\\LikBez\\Coursera\\08_Practical_Machine_Learning\\ProjectAssignment\\")
+trainingFilename <- "pml-training.csv"
+testingFilename <- "pml-testing.csv"
+```
+```{r cache=TRUE}
+set.seed(56789)
+dfRaw <- read.table(trainingFilename, sep=",", header=T, na.strings="NA"); df <- dfRaw
+dfTest <- read.table(testingFilename, sep=",", header=T, na.strings="NA")
+paste("Training data set has rows, columns: ", toString(dim(dfRaw)))
+```
+```{r cache=TRUE}
+naColumns <- clean_data(dfRaw)
+# Remove columns with high NA/empty ratio:
+df <- df[,-naColumns]
+dfTest <- dfTest[,-naColumns]
+paste("Trainig data set after removing NA/empty columns has", ncol(df), "columns.")
+
+# Remove non-numeric columns:
+df <- df[,7:60]
+dfTest <- dfTest[,7:60]
+paste("Trainig data set after removing non-numeric columns has", ncol(df), "columns.")
+```
+
+##### A2: #
+```{r cache=TRUE}
+library(caret)
+qplot(roll_forearm, classe, colour=classe, data=df)
+```
+
+```{r cache=TRUE}
+# Split df into training and testing data sets:
+inTrain <- createDataPartition(y=df$classe, p=0.6, list=F);
+training <- df[inTrain,]
+testing <- df[-inTrain,]
+dim(training)
+
+# Split training data set into a small and a large training set:
+smallInTrain <- createDataPartition(y=training$classe, p=0.25, list=F);
+smallTraining <- training[smallInTrain,];
+largeTraining <- training[-smallInTrain,];
+dim(smallTraining)
+
+modFitTree <- train(classe ~ ., method="rpart", data=smallTraining)
+confusionMatrix(smallTraining$classe, predict(modFitTree, smallTraining))
+```
+
+##### A3: #
+```{r cache=TRUE}
+modFitForest <- train(classe ~ ., method="rf", data=smallTraining)
+plot(modFitForest)
+```
+
+##### A4: #
+```{r cache=TRUE}
+confusionMatrix(smallTraining$classe, predict(modFitForest, smallTraining))
+confusionMatrix(largeTraining$classe, predict(modFitForest, largeTraining))
+confusionMatrix(testing$classe, predict(modFitForest, testing))
+
+# Generate predictions for the TEST dataset:
+pred <- predict(modFitForest, dfTest)
+paste("Test dataset predictions:", toString(pred))
+```
