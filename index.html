@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="08 pml projectassignment : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>08 pml projectassignment</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/vkoretsky/08_PML_ProjectAssignment">View on GitHub</a>
+
+          <h1 id="project_title">08 pml projectassignment</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/vkoretsky/08_PML_ProjectAssignment/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/vkoretsky/08_PML_ProjectAssignment/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>&lt;!DOCTYPE html&gt;
+
+</p>
+
+
+
+
+
+
+
+<p>
+
+</p>
+
+
+
+code{white-space: pre;}
+
+<p></p>
+
+
+
+
+pre:not([class]) {
+background-color: white;
+}
+
+
+
+
+<p>
+</p>
+
+
+.main-container {
+max-width: 940px;
+margin-left: auto;
+margin-right: auto;
+}
+
+
+<div>
+<div>
+<h3>
+<a name="08-practical-machine-learning---project-assignment" class="anchor" href="#08-practical-machine-learning---project-assignment"><span class="octicon octicon-link"></span></a>08 Practical Machine Learning - Project Assignment.</h3>
+<p>Author: vkoretsky | Date: 10-25-2014</p>
+<div>
+<h4>
+<a name="executive-summary" class="anchor" href="#executive-summary"><span class="octicon octicon-link"></span></a>Executive summary:</h4>
+<p>The project goal is to build a prediction model on a set of Human Activity Recognition (HAR) data. The data comes from the following source: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>.</p>
+</div>
+
+<div>
+<h4>
+<a name="dataset-description" class="anchor" href="#dataset-description"><span class="octicon octicon-link"></span></a>Dataset description:</h4>
+<p>HAR training data set: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a> HAR testing data set: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a> Data set consists of various measurements (3-D acceleration at various points) on subjects performing various types of activities (walking, standing, standing up, sitting, sitting down). The outcome variable is classe. Because alorigthm model selection is the main point of this exercise, I omitted downloading of data files from this script (on purpose).</p>
+</div>
+
+<div>
+<h4>
+<a name="exploratory-data-analysis" class="anchor" href="#exploratory-data-analysis"><span class="octicon octicon-link"></span></a>Exploratory Data Analysis:</h4>
+<p>The training dataset is comprised of 160 columns with 19622 observations. (** Appendix A1 **) There is a fair amount of columns with a high proportion of either NA or empty values. I removed these columns. The trigger I used was if more than 20% of observations in a column were NA values or if more than 80% of the column values were empty. However, the actual NA/empty ratios were in the 97% range, so these cutoffs turned out to be symbolic.</p>
+</div>
+
+<div>
+<h4>
+<a name="model-selection-strategy" class="anchor" href="#model-selection-strategy"><span class="octicon octicon-link"></span></a>Model Selection Strategy:</h4>
+<p>I attempted to plot availabe predictor variables against the outcome. The resulting plots were non-informative (every variable had values roughly in the same range accross most of the outcome categories). Example plot can be seen in ** Appendix A2 **. This dataset is not nice and clear-cut as our simple lecture examples and I was not able to come up with any single variable that could be used as a reliable and intuitive predictor. I split the training data set into training and testing sub-sets (60/40). The training sub-set was further split into a training and testing sub-sub-sets (25/75). I started with a tree model, which produced un-remarkable results (30-55% accuracy, depending on column options I chose). At that point, I decided to try random forest model. Use of this model necessitated removal of non-numeric columns.</p>
+</div>
+
+<div>
+<h4>
+<a name="model-tuning" class="anchor" href="#model-tuning"><span class="octicon octicon-link"></span></a>Model Tuning:</h4>
+<p>Due to random forest being processing-intensive, I performed model tuning on a training sub-sub-set (15% of total training data set). Computation took ~9min. The resulting model was based on 27 predictors. No pre-processing was done. Cross-validation was performed via 25 repetitions of bootstrapping. You can see model tuning parameters in ** Appendix A3 <strong>. I then tried to predict the values on the same set used to tune the model. The model fit the data perfectly (an example of overfitting). I then fit the model to the 60% of the training data set. The overall accuracy results were encouraging (98.07% accuracy). I then predicted the outcome on the remaining 40% of the training data set (set apart as test data) using this model, which produced 98.18% accuracy. I therefore, estimate out-of-sample error to be ~2%, based on these observations. Please see </strong> Appendix A4 ** for these details.</p>
+</div>
+
+<div>
+<h4>
+<a name="conclusion" class="anchor" href="#conclusion"><span class="octicon octicon-link"></span></a>Conclusion:</h4>
+<p>Overall, random forest model was highly effective in using the available data to provide a very accurate (by beginner standards) prediction. This model was able to predict 18/20 outcomes in the TEST data set (I actually got 20/20, but on my final version something changed and I could not reproduce that). The drawback of random forest approach (to me) is difficulty in inferring or explaining the results. I am not even sure how to identify the 27 out of 54 columns that were used in the final model.</p>
+</div>
+
+<div>
+<h4>
+<a name="appendix" class="anchor" href="#appendix"><span class="octicon octicon-link"></span></a>Appendix:</h4>
+<div>
+<h5>
+<a name="a1" class="anchor" href="#a1"><span class="octicon octicon-link"></span></a>A1:</h5>
+<pre><code>set.seed(56789)
+dfRaw &lt;- read.table(trainingFilename, sep=",", header=T, na.strings="NA"); df &lt;- dfRaw
+dfTest &lt;- read.table(testingFilename, sep=",", header=T, na.strings="NA")
+paste("Training data set has rows, columns: ", toString(dim(dfRaw)))</code></pre>
+<pre><code>## [1] "Training data set has rows, columns: 19622, 160"</code></pre>
+<pre><code>naColumns &lt;- clean_data(dfRaw)
+# Remove columns with high NA/empty ratio:
+df &lt;- df[,-naColumns]
+dfTest &lt;- dfTest[,-naColumns]
+paste("Trainig data set after removing NA/empty columns has", ncol(df), "columns.")</code></pre>
+<pre><code>## [1] "Trainig data set after removing NA/empty columns has 60 columns."</code></pre>
+<pre><code># Remove non-numeric columns:
+df &lt;- df[,7:60]
+dfTest &lt;- dfTest[,7:60]
+paste("Trainig data set after removing non-numeric columns has", ncol(df), "columns.")</code></pre>
+<pre><code>## [1] "Trainig data set after removing non-numeric columns has 54 columns."</code></pre>
+</div>
+
+<div>
+<h5>
+<a name="a2" class="anchor" href="#a2"><span class="octicon octicon-link"></span></a>A2:</h5>
+<pre><code>library(caret)
+qplot(roll_forearm, classe, colour=classe, data=df)</code></pre>
+<p><img title="plot of chunk unnamed-chunk-5" alt="plot of chunk unnamed-chunk-5" width="672"></p>
+<pre><code># Split df into training and testing data sets:
+inTrain &lt;- createDataPartition(y=df$classe, p=0.6, list=F);
+training &lt;- df[inTrain,]
+testing &lt;- df[-inTrain,]
+dim(training)</code></pre>
+<pre><code>## [1] 11776 54</code></pre>
+<pre><code># Split training data set into a small and a large training set:
+smallInTrain &lt;- createDataPartition(y=training$classe, p=0.25, list=F);
+smallTraining &lt;- training[smallInTrain,];
+largeTraining &lt;- training[-smallInTrain,];
+dim(smallTraining)</code></pre>
+<pre><code>## [1] 2946 54</code></pre>
+<pre><code>modFitTree &lt;- train(classe ~ ., method="rpart", data=smallTraining)</code></pre>
+<pre><code>## Loading required package: rpart</code></pre>
+<pre><code>confusionMatrix(smallTraining$classe, predict(modFitTree, smallTraining))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+##
+## Reference
+## Prediction A B C D E
+## A 712 26 97 0 2
+## B 126 236 208 0 0
+## C 47 40 427 0 0
+## D 141 116 226 0 0
+## E 126 110 87 0 219
+##
+## Overall Statistics
+##
+## Accuracy : 0.541
+## 95% CI : (0.523, 0.559)
+## No Information Rate : 0.391
+## P-Value [Acc &gt; NIR] : &lt;2e-16
+##
+## Kappa : 0.411
+## Mcnemar's Test P-Value : NA
+##
+## Statistics by Class:
+##
+## Class: A Class: B Class: C Class: D Class: E
+## Sensitivity 0.618 0.4470 0.409 NA 0.9910
+## Specificity 0.930 0.8619 0.954 0.836 0.8815
+## Pos Pred Value 0.851 0.4140 0.831 NA 0.4041
+## Neg Pred Value 0.791 0.8771 0.746 NA 0.9992
+## Prevalence 0.391 0.1792 0.355 0.000 0.0750
+## Detection Rate 0.242 0.0801 0.145 0.000 0.0743
+## Detection Prevalence 0.284 0.1935 0.174 0.164 0.1840
+## Balanced Accuracy 0.774 0.6544 0.681 NA 0.9362</code></pre>
+</div>
+
+<div>
+<h5>
+<a name="a3" class="anchor" href="#a3"><span class="octicon octicon-link"></span></a>A3:</h5>
+<pre><code>modFitForest &lt;- train(classe ~ ., method="rf", data=smallTraining)</code></pre>
+<pre><code>## Loading required package: randomForest
+## randomForest 4.6-10
+## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>plot(modFitForest)</code></pre>
+<p><img title="plot of chunk unnamed-chunk-7" alt="plot of chunk unnamed-chunk-7" width="672"></p>
+</div>
+
+<div>
+<h5>
+<a name="a4" class="anchor" href="#a4"><span class="octicon octicon-link"></span></a>A4:</h5>
+<pre><code>confusionMatrix(smallTraining$classe, predict(modFitForest, smallTraining))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+##
+## Reference
+## Prediction A B C D E
+## A 837 0 0 0 0
+## B 0 570 0 0 0
+## C 0 0 514 0 0
+## D 0 0 0 483 0
+## E 0 0 0 0 542
+##
+## Overall Statistics
+##
+## Accuracy : 1
+## 95% CI : (0.999, 1)
+## No Information Rate : 0.284
+## P-Value [Acc &gt; NIR] : &lt;2e-16
+##
+## Kappa : 1
+## Mcnemar's Test P-Value : NA
+##
+## Statistics by Class:
+##
+## Class: A Class: B Class: C Class: D Class: E
+## Sensitivity 1.000 1.000 1.000 1.000 1.000
+## Specificity 1.000 1.000 1.000 1.000 1.000
+## Pos Pred Value 1.000 1.000 1.000 1.000 1.000
+## Neg Pred Value 1.000 1.000 1.000 1.000 1.000
+## Prevalence 0.284 0.193 0.174 0.164 0.184
+## Detection Rate 0.284 0.193 0.174 0.164 0.184
+## Detection Prevalence 0.284 0.193 0.174 0.164 0.184
+## Balanced Accuracy 1.000 1.000 1.000 1.000 1.000</code></pre>
+<pre><code>confusionMatrix(largeTraining$classe, predict(modFitForest, largeTraining))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+##
+## Reference
+## Prediction A B C D E
+## A 2507 0 0 1 3
+## B 39 1645 21 0 4
+## C 0 22 1515 3 0
+## D 0 1 37 1403 6
+## E 0 7 2 21 1593
+##
+## Overall Statistics
+##
+## Accuracy : 0.981
+## 95% CI : (0.978, 0.984)
+## No Information Rate : 0.288
+## P-Value [Acc &gt; NIR] : &lt;2e-16
+##
+## Kappa : 0.976
+## Mcnemar's Test P-Value : NA
+##
+## Statistics by Class:
+##
+## Class: A Class: B Class: C Class: D Class: E
+## Sensitivity 0.985 0.982 0.962 0.982 0.992
+## Specificity 0.999 0.991 0.997 0.994 0.996
+## Pos Pred Value 0.998 0.963 0.984 0.970 0.982
+## Neg Pred Value 0.994 0.996 0.992 0.997 0.998
+## Prevalence 0.288 0.190 0.178 0.162 0.182
+## Detection Rate 0.284 0.186 0.172 0.159 0.180
+## Detection Prevalence 0.284 0.194 0.174 0.164 0.184
+## Balanced Accuracy 0.992 0.987 0.979 0.988 0.994</code></pre>
+<pre><code>confusionMatrix(testing$classe, predict(modFitForest, testing))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+##
+## Reference
+## Prediction A B C D E
+## A 2228 0 1 0 3
+## B 28 1473 14 0 3
+## C 0 31 1333 4 0
+## D 0 3 24 1252 7
+## E 2 9 0 14 1417
+##
+## Overall Statistics
+##
+## Accuracy : 0.982
+## 95% CI : (0.979, 0.985)
+## No Information Rate : 0.288
+## P-Value [Acc &gt; NIR] : &lt;2e-16
+##
+## Kappa : 0.977
+## Mcnemar's Test P-Value : NA
+##
+## Statistics by Class:
+##
+## Class: A Class: B Class: C Class: D Class: E
+## Sensitivity 0.987 0.972 0.972 0.986 0.991
+## Specificity 0.999 0.993 0.995 0.995 0.996
+## Pos Pred Value 0.998 0.970 0.974 0.974 0.983
+## Neg Pred Value 0.995 0.993 0.994 0.997 0.998
+## Prevalence 0.288 0.193 0.175 0.162 0.182
+## Detection Rate 0.284 0.188 0.170 0.160 0.181
+## Detection Prevalence 0.284 0.193 0.174 0.164 0.184
+## Balanced Accuracy 0.993 0.982 0.983 0.990 0.994</code></pre>
+<pre><code># Generate predictions for the TEST dataset:
+pred &lt;- predict(modFitForest, dfTest)
+paste("Test dataset predictions:", toString(pred))</code></pre>
+<pre><code>## [1] "Test dataset predictions: B, A, A, A, A, E, D, D, A, A, B, C, B, A, E, E, A, B, B, B"</code></pre>
+</div>
+
+<p></p>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+<p>
+</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">08 pml projectassignment maintained by <a href="https://github.com/vkoretsky">vkoretsky</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
